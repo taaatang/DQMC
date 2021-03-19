@@ -4,15 +4,15 @@ include("helper.jl")
 Nx = 6
 Ny = 6
 periodic = true
-β = 5.0
-L = 50
-U = 4.0
+β = 1.0/0.06
+L = Int64(ceil(β/0.1))
+U = 2.0
 nwarm = 200
 nmeas = 800
 N = Nx * Ny
 dτ = β/L
 λ = acosh(exp(dτ * U / 2.0))
-##
+## Initialization
 K = constructK(N, periodic)
 expK = exp(-dτ * K)
 invexpK = exp(dτ * K)
@@ -21,14 +21,20 @@ s = rand([-1, 1], (N, L))
 σd = -1.0
 expVu = exp.(σu * λ * s)
 expVd = exp.(σd * λ * s) 
-gu = Green(expK, expVu)
-gd = Green(expK, expVd)
+lb = 10
+lw= 5
+gu = Green(expK, expVu, 1, lb)
+gd = Green(expK, expVd, 1, lb)
 ## MC iteration
 nu = 0.0
 nd = 0.0
 doubleocc = 0.0
-for sweep = 1:(nwarm + nmeas)
+@time for sweep = 1:(nwarm + nmeas)
     for l = 1:L
+        if l % lw == 0
+            gu = Green(expK, expVu, l, lb)
+            gd = Green(expK, expVd, l, lb) 
+        end
         for i = 1:N
             fu = factor(s[i,l], λ, σu)
             fd = factor(s[i,l], λ, σd)
@@ -45,8 +51,8 @@ for sweep = 1:(nwarm + nmeas)
         wrapG!(gu, l, expK, expVu)
         wrapG!(gd, l, expK, expVd)
     end
-    gu = Green(expK, expVu)
-    gd = Green(expK, expVd)
+    gu = Green(expK, expVu, 1, lb)
+    gd = Green(expK, expVd, 1, lb)
     # measurement
     if sweep > nwarm
         for i = 1:N
