@@ -47,7 +47,7 @@ function Green(expK, expV)
     return inv(I + g)
 end
 
-
+# TODO: optimization, don't need to recalculate B(i+d-1)*...*B(i) each time
 """
 @brief Improved Green's function using pivoted QR
 @param l0: recalculate Green's function after l0 wraps, g = inv(I + ...B(l0+1) * B(l0))
