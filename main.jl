@@ -4,14 +4,15 @@ include("helper.jl")
 Nx = 6
 Ny = 6
 periodic = true
+U = 2.0
 β = 1.0/0.06
 L = Int64(ceil(β/0.1))
-U = 2.0
+dτ = β/L
+N = Nx * Ny
+λ = acosh(exp(dτ * U / 2.0))
+
 nwarm = 200
 nmeas = 800
-N = Nx * Ny
-dτ = β/L
-λ = acosh(exp(dτ * U / 2.0))
 ## Initialization
 K = constructK(N, periodic)
 expK = exp(-dτ * K)
